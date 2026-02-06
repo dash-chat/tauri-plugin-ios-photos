@@ -1,72 +1,70 @@
 # Tauri Plugin iOS Photos
 
-[查看中文](./README.zh-CN.md)
+一个用于访问和管理 **iOS 照片应用中的相册和资源** 的 Tauri 插件，基于原生的 Photos 框架。
 
-A Tauri plugin for accessing and managing **iOS Photos albums and assets** using the native Photos framework.
+该插件允许 Tauri 应用在 iOS 设备上请求照片权限、读取相册、访问照片以及执行基本的相册/照片管理。
 
-This plugin allows Tauri applications to request photo permissions, read albums, access photos, and perform basic album/photo management on iOS devices.
-
-> ⚠️ iOS only. This plugin relies on Apple Photos APIs and is not available on other platforms.
+> ⚠️ 仅支持 iOS。此插件依赖于 Apple Photos API，在其他平台上不可用。
 
 ---
 
-## Features
+## 功能
 
-- Request and check photo library authorization
-- List user photo albums
-- Access photos from albums
-- Filter albums
-- Check album permission
-- Create and remove albums
-- Create, access, and delete photos
-- Create, access, and delete videos
-
----
-
-## Requirements
-
-- Tauri 2.x (or compatible version)
-- Xcode with iOS SDK
-- Proper Photo Library permissions configured in `Info.plist`
+- 请求和检查照片库授权
+- 列出用户相册
+- 从相册中访问照片
+- 筛选相册
+- 检查相册权限
+- 创建和删除相册
+- 创建、访问和删除照片
+- 创建、访问和删除视频
 
 ---
 
-## iOS Permissions
+## 要求
 
-This plugin requires access to the user’s photo library.
+- Tauri 2.x (或兼容版本)
+- Xcode 及 iOS SDK
+- 在 `Info.plist` 中配置正确的照片库权限
 
-Make sure the following keys are added to your **iOS `Info.plist`**:
+---
+
+## iOS 权限
+
+此插件需要访问用户的照片库。
+
+请确保将以下键值添加到您的 **iOS `Info.plist`** 文件中：
 
 ```xml
 <key>NSPhotoLibraryUsageDescription</key>
-<string>Allow access to your photo library</string>
+<string>允许访问您的照片库</string>
 
 <key>NSPhotoLibraryAddUsageDescription</key>
-<string>Allow saving photos to your photo library</string>
+<string>允许将照片保存到您的照片库</string>
 ```
 
 ---
 
-## Installation
+## 安装
 
 ```bash
 pnpm add @gbyte/tauri-plugin-ios-photos
-# or
+# 或
 npm install @gbyte/tauri-plugin-ios-photos
-# or
+# 或
 yarn add @gbyte/tauri-plugin-ios-photos
 ```
 
-Add the plugin to your Tauri project's `Cargo.toml`:
+将插件添加到您 Tauri 项目的 `Cargo.toml` 中：
 
 ```toml
 [dependencies]
 tauri-plugin-ios-photos = "0.3"
 ```
 
-Or use `cargo add tauri-plugin-ios-photos`.
+或者使用 `cargo add tauri-plugin-ios-photos`。
 
-Configure the plugin permissions in your `capabilities/default.json`:
+在您的 `capabilities/default.json` 中配置插件权限：
 
 ```json
 {
@@ -74,7 +72,7 @@ Configure the plugin permissions in your `capabilities/default.json`:
 }
 ```
 
-Register the plugin in your Tauri app:
+在您的 Tauri 应用中注册插件：
 
 ```rust
 fn main() {
@@ -87,7 +85,7 @@ fn main() {
 
 ---
 
-## Usage (Conceptual Example)
+## 使用示例 (概念性)
 
 ```ts
 import {
@@ -133,61 +131,61 @@ requestPhotosAuth()
 
 ---
 
-## APIs
+## API
 
-### Methods
+### 方法
 
 #### `requestPhotosAuth(): Promise<PhotosAuthorizationStatus | null>`
 
-Request photo library authorization.
+请求照片库授权。
 
 #### `getPhotosAuthStatus(): Promise<PhotosAuthorizationStatus | null>`
 
-Get the current photo library authorization status.
+获取当前的照片库授权状态。
 
 #### `requestAlbums(payload: RequestAlbumRequest): Promise<AlbumItem[]>`
 
-Request user device albums.
+请求用户设备的相册。
 
 #### `requestAlbumMedias(payload: RequestAlbumMediasRequest): Promise<MediaItem[]>`
 
-Request user medias by album.
+根据相册请求用户的媒体文件。
 
 #### `checkAlbumCanOperation(payload: CheckAlbumCanOperationRequest): Promise<boolean>`
 
-Check album support operation status.
+检查相册是否支持某项操作。
 
 #### `createAlbum(payload: CreateAlbumRequest): Promise<Identifier | null>`
 
-Create album.
+创建相册。
 
 #### `createPhotos(payload: CreateMediaRequest): Promise<Identifiers | null>`
 
-Create photo to album.
+向相册中创建照片。
 
 #### `createVideos(payload: CreateMediaRequest): Promise<Identifiers | null>`
 
-Create videos to album.
+向相册中创建视频。
 
 #### `deleteAlbum(payload: DeleteAlbumRequest): Promise<boolean>`
 
-Delete album, is forever.
+永久删除相册。
 
 #### `deleteAlbumMedias(payload: DeleteAlbumMediasRequest): Promise<boolean>`
 
-Delete medias from album, is forever.
+从相册中永久删除媒体文件。
 
 #### `removeAlbumMedias(payload: DeleteAlbumMediasRequest): Promise<boolean>`
 
-Remove medias from album, is not forever.
+从相册中移除媒体文件（非永久）。
 
-### Type Definitions
+### 类型定义
 
 #### `PhotosAuthorizationStatus`
 
 ```ts
 /**
- * Information about your app’s authorization to access the user’s photo library.
+ * 有关您的应用访问用户照片库的授权信息。
  *
  * @see [PHAuthorizationStatus](https://developer.apple.com/documentation/photos/phauthorizationstatus)
  */
@@ -204,7 +202,7 @@ export declare const PhotosAuthorizationStatus: {
 
 ```ts
 /**
- * Values identifying possible actions that a collection can support.
+ * 标识集合可以支持的可能操作的值。
  *
  * @see [PHCollectionEditOperation](https://developer.apple.com/documentation/photos/phcollectioneditoperation)
  */
@@ -223,17 +221,17 @@ export declare const PHCollectionEditOperation: {
 
 ```ts
 /**
- * Major distinctions between kinds of asset collections.
+ * 资产集合类型之间的主要区别。
  *
  * @see [PHAssetCollectionType](https://developer.apple.com/documentation/photos/phassetcollectiontype)
  */
 export declare const PHAssetCollectionType: {
   /**
-   * An album in the Photos app.
+   * 照片应用中的一个相册。
    */
   readonly album: 1
   /**
-   * A smart album whose contents update dynamically.
+   * 内容动态更新的智能相册。
    */
   readonly smartAlbum: 2
 }
@@ -243,7 +241,7 @@ export declare const PHAssetCollectionType: {
 
 ```ts
 /**
- * Minor distinctions between kinds of asset collections.
+ * 资产集合类型之间的次要区别。
  *
  * @see [PHAssetCollectionSubtype](https://developer.apple.com/documentation/photos/phassetcollectionsubtype)
  */
@@ -384,78 +382,78 @@ export type PluginReturnValue<T> = {
 
 ---
 
-## About Image Path Access
+## 关于图片路径访问
 
-The image paths returned by this plugin are local file paths, typically pointing to internal iOS sandbox locations.
+此插件返回的图片路径是本地文件路径，通常指向 iOS 沙盒内部位置。
 
-In Tauri (especially on iOS / WebView environments), these local paths cannot be accessed directly by the frontend (e.g. via file:// or raw filesystem paths). This is due to WebView security and sandbox restrictions.
+在 Tauri (尤其是在 iOS / WebView 环境) 中，由于 WebView 的安全和沙盒限制，这些本地路径不能被前端直接访问 (例如通过 `file://` 或原始文件系统路径)。
 
-Before using these images in the frontend, you must expose them through a Tauri custom protocol (URI scheme) so they can be accessed as normal URLs.
+在前端使用这些图片之前，您必须通过 Tauri 自定义协议 (URI scheme) 将它们暴露出来，以便可以像普通 URL 一样访问。
 
-Recommended approach:
+推荐方法：
 
-1. Register a custom URI scheme in Tauri (for example, temp://)
+1. 在 Tauri 中注册一个自定义 URI scheme (例如 `temp://`)
 
-2. When the frontend requests `temp://<local-path>`:
+2. 当前端请求 `temp://<local-path>` 时：
 
-- Tauri reads the corresponding local file
+- Tauri 读取相应的本地文件
 
-- Returns the binary data with the correct MIME type
+- 返回带有正确 MIME 类型的二进制数据
 
-1. The frontend can then use the URL normally (e.g. `<img src="temp://..." />`)
+1. 前端随后可以正常使用该 URL (例如 `<img src="temp://..." />`)
 
-> ⚠️ Notes:
+> ⚠️ 注意：
 >
-> - This plugin does not automatically convert local paths into accessible URLs
+> - 此插件不会自动将本地路径转换为可访问的 URL
 >
-> - Implementing the custom protocol is the responsibility of the application
+> - 实现自定义协议是应用程序的责任
 >
-> - For security reasons, it is recommended to restrict the accessible path scope
+> - 出于安全原因，建议限制可访问的路径范围
 
 ---
 
-## Authorization Status
+## 授权状态
 
-Possible authorization states:
+可能的授权状态：
 
-- `notDetermined`
-- `restricted`
-- `denied`
-- `authorized`
-- `limited`
+- `notDetermined` (未决定)
+- `restricted` (受限制)
+- `denied` (已拒绝)
+- `authorized` (已授权)
+- `limited` (部分授权)
 
-The plugin exposes APIs to query and react to these states.
-
----
-
-## Todos / Roadmap
-
-- [x] Request access authorization
-- [x] Check authorization type
-- [x] List user device albums
-- [x] Get photos from album
-- [x] Filter album
-- [x] Check album permission
-- [x] Access photo
-- [x] Create album
-- [x] Create photo
-- [x] Remove album
-- [x] Remove photo
-- [x] Delete photo
-- [x] Documentation improvements
-- [ ] Example project
-- [ ] Error handling standardization
+该插件提供了查询和响应这些状态的 API。
 
 ---
 
-## Notes
+## 待办事项 / 路线图
 
-- All photo operations follow iOS privacy rules.
-- Some actions may fail silently if permission is limited.
-- Album and photo identifiers are system-generated.
+- [x] 请求访问授权
+- [x] 检查授权类型
+- [x] 列出用户设备相册
+- [x] 从相册获取照片
+- [x] 筛选相册
+- [x] 检查相册权限
+- [x] 访问照片
+- [x] 创建相册
+- [x] 创建照片
+- [x] 移除相册
+- [x] 移除照片
+- [x] 删除照片
+- [x] 文档改进
+- [ ] 示例项目
+- [ ] 错误处理标准化
 
 ---
 
-## License
+## 注意事项
+
+- 所有照片操作都遵循 iOS 的隐私规则。
+- 如果权限受限，某些操作可能会静默失败。
+- 相册和照片的标识符由系统生成。
+
+---
+
+## 许可证
 
 MIT
