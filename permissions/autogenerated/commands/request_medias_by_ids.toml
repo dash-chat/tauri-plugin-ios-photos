@@ -1,0 +1,13 @@
+# Automatically generated - DO NOT EDIT!
+
+"$schema" = "../../schemas/schema.json"
+
+[[permission]]
+identifier = "allow-request-medias-by-ids"
+description = "Enables the request_medias_by_ids command without any pre-configured scope."
+commands.allow = ["request_medias_by_ids"]
+
+[[permission]]
+identifier = "deny-request-medias-by-ids"
+description = "Denies the request_medias_by_ids command without any pre-configured scope."
+commands.deny = ["request_medias_by_ids"]

@@ -16,6 +16,17 @@ class GetAlbumMediasArgs: Decodable {
   let height: Int
   let width: Int
   let quality: CGFloat
+  // Newest-first window into the album. When `limit` is set only that many of
+  // the most recent assets are fetched and rendered, instead of the whole album.
+  let limit: Int?
+  let offset: Int?
+}
+
+class GetMediasByIdsArgs: Decodable {
+  let ids: [String]
+  let height: Int
+  let width: Int
+  let quality: CGFloat
 }
 
 class CheckAlbumCanOperationArgs: Decodable {
@@ -151,8 +162,56 @@ func exportVideo(asset: PHAsset, completion: @escaping (URL?) -> Void) {
   }
 }
 
+/// Renders a single asset to a temp file (JPEG for images, exported file for
+/// videos) and appends the resulting `MediaItem` via `append`. `group` tracks
+/// the async video export so callers know when all items are ready.
+func renderMedia(
+  _ media: PHAsset, _ pmanager: PHImageManager, _ targetSize: CGSize, _ quality: CGFloat,
+  _ options: PHImageRequestOptions, _ group: DispatchGroup, _ append: @escaping (MediaItem) -> Void
+) {
+  var item = MediaItem(
+    id: media.localIdentifier,
+    mediaType: media.mediaType.rawValue,
+    createAt: media.creationDate?.timeIntervalSince1970 ?? 0.0
+  )
+
+  switch media.mediaType {
+  case .image:
+    pmanager.requestImage(
+      for: media, targetSize: targetSize, contentMode: .aspectFit, options: options
+    ) { raw, _ in
+      if let img = raw {
+        if let jpg = img.jpegData(compressionQuality: quality) {
+          item.data = writeTempFile(jpg, "jpg")
+        }
+      }
+
+      // PHImageRequestOptions.isSynchronous is true
+      // so can sync append jpg item
+      append(item)
+    }
+  case .video:
+    group.enter()
+
+    exportVideo(asset: media) { url in
+
+      defer { group.leave() }
+
+      if let path = url?.path {
+        item.data = path
+      }
+      // PHImageRequestOptions.isSynchronous not work on request video
+      // so must move append item to callback
+      append(item)
+    }
+  default:
+    break
+  }
+}
+
 func getAlbumMedias(
   id: String, targetSize: CGSize, quality: CGFloat = 0.8,
+  limit: Int? = nil, offset: Int? = nil,
   completion: @escaping ([MediaItem]) -> Void
 ) {
   var result: [MediaItem] = []
@@ -165,47 +224,47 @@ func getAlbumMedias(
   options.isSynchronous = true
   options.resizeMode = .exact
 
+  // Newest-first, and only fetch as far as the requested window so we don't
+  // render the entire album. `fetchLimit` caps the fetch at offset+limit; we
+  // then skip the first `offset` to land on the window.
+  let start = offset ?? 0
+  let fetchOptions = PHFetchOptions()
+  fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+  if let limit = limit {
+    fetchOptions.fetchLimit = start + limit
+  }
+
   albums.enumerateObjects { album, _, _ in
-    PHAsset.fetchAssets(in: album, options: nil).enumerateObjects { media, _, _ in
-      var item = MediaItem(
-        id: media.localIdentifier,
-        mediaType: media.mediaType.rawValue,
-        createAt: media.creationDate?.timeIntervalSince1970 ?? 0.0
-      )
-
-      switch media.mediaType {
-      case .image:
-        pmanager.requestImage(
-          for: media, targetSize: targetSize, contentMode: .aspectFit, options: options
-        ) { raw, _ in
-          if let img = raw {
-            if let jpg = img.jpegData(compressionQuality: quality) {
-              item.data = writeTempFile(jpg, "jpg")
-            }
-          }
-
-          // PHImageRequestOptions.isSynchronous is true
-          // so can sync append jpg item
-          result.append(item)
-        }
-      case .video:
-        group.enter()
-
-        exportVideo(asset: media) { url in
-
-          defer { group.leave() }
-
-          if let path = url?.path {
-            item.data = path
-          }
-          // PHImageRequestOptions.isSynchronous not work on request video
-          // so must move append item to callback
-          result.append(item)
-        }
-      default:
-        break
-      }
+    PHAsset.fetchAssets(in: album, options: fetchOptions).enumerateObjects { media, index, _ in
+      if index < start { return }
+      renderMedia(media, pmanager, targetSize, quality, options, group) { result.append($0) }
     }
+  }
+
+  group.notify(queue: .main) {
+    completion(result)
+  }
+}
+
+/// Fetches specific assets by local identifier and renders them, without
+/// touching the rest of the library. Used to materialize a single tapped photo
+/// at full resolution. Allows iCloud download so non-local assets resolve.
+func getMediasByIds(
+  ids: [String], targetSize: CGSize, quality: CGFloat = 0.8,
+  completion: @escaping ([MediaItem]) -> Void
+) {
+  var result: [MediaItem] = []
+  let pmanager = PHImageManager.default()
+  let options = PHImageRequestOptions()
+  let group = DispatchGroup()
+
+  options.deliveryMode = .highQualityFormat
+  options.isSynchronous = true
+  options.resizeMode = .exact
+  options.isNetworkAccessAllowed = true
+
+  PHAsset.fetchAssets(withLocalIdentifiers: ids, options: nil).enumerateObjects { media, _, _ in
+    renderMedia(media, pmanager, targetSize, quality, options, group) { result.append($0) }
   }
 
   group.notify(queue: .main) {
@@ -361,6 +420,17 @@ class PhotosPlugin: Plugin {
 
     getAlbumMedias(
       id: args.id, targetSize: CGSize(width: args.width, height: args.height),
+      quality: args.quality, limit: args.limit, offset: args.offset
+    ) { medias in
+      invoke.resolve(["value": medias])
+    }
+  }
+
+  @objc public func requestMediasByIds(_ invoke: Invoke) throws {
+    let args = try invoke.parseArgs(GetMediasByIdsArgs.self)
+
+    getMediasByIds(
+      ids: args.ids, targetSize: CGSize(width: args.width, height: args.height),
       quality: args.quality
     ) { medias in
       invoke.resolve(["value": medias])

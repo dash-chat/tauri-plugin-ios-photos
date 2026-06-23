@@ -52,6 +52,19 @@ pub struct RequestAlbumMediasRequest {
     pub height: isize,
     pub width: isize,
     pub quality: f64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub limit: Option<isize>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub offset: Option<isize>,
+}
+
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RequestMediasByIdsRequest {
+    pub ids: Vec<String>,
+    pub height: isize,
+    pub width: isize,
+    pub quality: f64,
 }
 
 #[derive(Debug, Clone, Default, Deserialize, Serialize)]

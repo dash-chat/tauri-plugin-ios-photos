@@ -114,6 +114,17 @@ export type RequestAlbumMediasRequest = {
   height: number
   width: number
   quality: number
+  /** Render only the `limit` most recent assets instead of the whole album. */
+  limit?: number
+  /** Skip the `offset` most recent assets (newest-first), for paging. */
+  offset?: number
+}
+
+export type RequestMediasByIdsRequest = {
+  ids: string[]
+  height: number
+  width: number
+  quality: number
 }
 
 export type CheckAlbumCanOperationRequest = {
@@ -191,6 +202,22 @@ export async function requestAlbums(payload: RequestAlbumRequest): Promise<Album
  */
 export async function requestAlbumMedias(payload: RequestAlbumMediasRequest): Promise<MediaItem[]> {
   return await invoke<PluginReturnValue<MediaItem[]>>('plugin:ios-photos|request_album_medias', {
+    payload
+  }).then((r) => r.value ?? [])
+}
+
+/**
+ * request specific medias by their local identifiers, without enumerating the
+ * rest of the library. Useful to materialize a single tapped asset at full
+ * resolution.
+ *
+ * @param payload request payload
+ * @returns the rendered medias for the given ids
+ */
+export async function requestMediasByIds(
+  payload: RequestMediasByIdsRequest
+): Promise<MediaItem[]> {
+  return await invoke<PluginReturnValue<MediaItem[]>>('plugin:ios-photos|request_medias_by_ids', {
     payload
   }).then((r) => r.value ?? [])
 }

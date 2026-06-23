@@ -2,6 +2,7 @@ const COMMANDS: &[&str] = &[
     "request_photos_auth",
     "request_albums",
     "request_album_medias",
+    "request_medias_by_ids",
     "check_album_can_operation",
     "get_photos_auth_status",
     "create_album",

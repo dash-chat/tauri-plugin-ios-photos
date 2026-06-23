@@ -41,6 +41,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             commands::get_photos_auth_status,
             commands::request_albums,
             commands::request_album_medias,
+            commands::request_medias_by_ids,
             commands::check_album_can_operation,
             commands::create_album,
             commands::create_photos,

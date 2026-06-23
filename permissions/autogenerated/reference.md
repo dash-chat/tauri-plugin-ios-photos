@@ -8,6 +8,7 @@ Default permissions for the plugin
 - `allow-get-photos-auth-status`
 - `allow-request-albums`
 - `allow-request-album-medias`
+- `allow-request-medias-by-ids`
 - `allow-check-album-can-operation`
 - `allow-create-album`
 - `allow-create-photos`
@@ -281,6 +282,32 @@ Enables the request_albums command without any pre-configured scope.
 <td>
 
 Denies the request_albums command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`ios-photos:allow-request-medias-by-ids`
+
+</td>
+<td>
+
+Enables the request_medias_by_ids command without any pre-configured scope.
+
+</td>
+</tr>
+
+<tr>
+<td>
+
+`ios-photos:deny-request-medias-by-ids`
+
+</td>
+<td>
+
+Denies the request_medias_by_ids command without any pre-configured scope.
 
 </td>
 </tr>

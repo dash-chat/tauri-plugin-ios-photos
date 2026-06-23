@@ -5,6 +5,7 @@ permissions = [
   "allow-get-photos-auth-status",
   "allow-request-albums",
   "allow-request-album-medias",
+  "allow-request-medias-by-ids",
   "allow-check-album-can-operation",
   "allow-create-album",
   "allow-create-photos",

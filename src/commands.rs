@@ -36,6 +36,14 @@ pub(crate) async fn request_album_medias<R: Runtime>(
 }
 
 #[command]
+pub(crate) async fn request_medias_by_ids<R: Runtime>(
+    app: AppHandle<R>,
+    payload: RequestMediasByIdsRequest,
+) -> Result<RequestAlbumMediasResponse> {
+    app.ios_photos().request_medias_by_ids(payload).await
+}
+
+#[command]
 pub(crate) async fn check_album_can_operation<R: Runtime>(
     app: AppHandle<R>,
     payload: CheckAlbumCanOperationRequest,

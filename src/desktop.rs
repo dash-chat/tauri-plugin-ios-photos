@@ -45,6 +45,14 @@ impl<R: Runtime> IosPhotos<R> {
             "iOS Photos Not Supported This Platform.",
         )))
     }
+    pub async fn request_medias_by_ids(
+        &self,
+        _payload: RequestMediasByIdsRequest,
+    ) -> crate::Result<RequestAlbumMediasResponse> {
+        Err(crate::Error::from(std::io::Error::other(
+            "iOS Photos Not Supported This Platform.",
+        )))
+    }
     pub async fn check_album_can_operation(
         &self,
         _payload: CheckAlbumCanOperationRequest,

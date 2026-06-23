@@ -59,6 +59,16 @@ impl<R: Runtime> IosPhotos<R> {
             .map_err(Into::into)
     }
 
+    pub async fn request_medias_by_ids(
+        &self,
+        payload: RequestMediasByIdsRequest,
+    ) -> crate::Result<RequestAlbumMediasResponse> {
+        self.0
+            .run_mobile_plugin_async("requestMediasByIds", payload)
+            .await
+            .map_err(Into::into)
+    }
+
     pub async fn check_album_can_operation(
         &self,
         payload: CheckAlbumCanOperationRequest,
